@@ -1,0 +1,59 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[oc]
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+wheels/
+*.egg-info/
+.venv/
+env/
+venv/
+.pytest_cache/
+
+# Local data & database files
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.parquet
+
+# Local development, PowerBI & Superset simulation files
+local_dev/
+powerbi/
+superset/
+dashboard_app.py
+run_dashboard.bat
+run_grafana.bat
+test_streamlit*.py
+streamlit*.png
+exported_dashboard.zip
+.python-version
+uv.lock
+
+# Grafana local browser profile & temporary scripts
+grafana/edge_temp_profile/
+grafana/*.png
+grafana/actual_view.png
+grafana/dash1_rendered.png
+grafana/dash2_full.png
+grafana/dash2_rendered.png
+grafana/dash2_test.png
+grafana/test_*.png
+grafana/check_*.py
+grafana/debug_*.py
+grafana/diagnose_*.py
+grafana/inspect_*.py
+grafana/take_screenshot*.py
+grafana/test_*.py
+grafana/cdp_*.py
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

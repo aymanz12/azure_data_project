@@ -1,0 +1,146 @@
+{
+  "name": "banking_medallion_pipeline",
+  "description": "Databricks Workflow Job that orchestrates the full Medallion Architecture pipeline for the Banking project. Runs daily at 07:00 UTC after ADF ingestion completes.",
+  "email_notifications": {
+    "on_start"   : ["data-engineering@company.com"],
+    "on_success" : ["data-engineering@company.com"],
+    "on_failure" : ["data-engineering@company.com", "data-team-lead@company.com"],
+    "no_alert_for_skipped_runs": false
+  },
+  "webhook_notifications": {
+    "on_failure": [
+      { "id": "<TEAMS_WEBHOOK_ID>" }
+    ]
+  },
+  "timeout_seconds": 14400,
+  "max_concurrent_runs": 1,
+  "schedule": {
+    "quartz_cron_expression": "0 0 7 * * ?",
+    "timezone_id"           : "UTC",
+    "pause_status"          : "UNPAUSED"
+  },
+  "tags": {
+    "team"       : "data-engineering",
+    "project"    : "banking-medallion",
+    "environment": "production",
+    "cost-center": "analytics"
+  },
+  "job_clusters": [
+    {
+      "job_cluster_key": "medallion_cluster",
+      "new_cluster": {
+        "spark_version"  : "13.3.x-scala2.12",
+        "node_type_id"   : "Standard_DS3_v2",
+        "num_workers"    : 4,
+        "autoscale"      : { "min_workers": 2, "max_workers": 8 },
+        "spark_conf": {
+          "spark.sql.extensions"                        : "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.sql.catalog.spark_catalog"             : "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.databricks.delta.retentionDurationCheck.enabled": "false",
+          "spark.databricks.io.cache.enabled"           : "true"
+        },
+        "spark_env_vars": {
+          "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+        },
+        "init_scripts": [],
+        "enable_elastic_disk"    : true,
+        "data_security_mode"     : "SINGLE_USER",
+        "runtime_engine"         : "PHOTON",
+        "azure_attributes": {
+          "availability": "ON_DEMAND_AZURE",
+          "first_on_demand": 1
+        }
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task_key"        : "01_Bronze_Ingest",
+      "description"     : "Reads raw Parquet files dropped by ADF into ADLS Bronze and writes Delta tables.",
+      "job_cluster_key" : "medallion_cluster",
+      "notebook_task": {
+        "notebook_path"  : "/Repos/banking_project/databricks/notebooks/01_bronze_ingest",
+        "base_parameters": {
+          "bronze_path": "abfss://bronze@<ADLS>.dfs.core.windows.net/banking",
+          "run_date"   : "{{job.start_time.iso_date}}"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds"    : 3600,
+      "max_retries"        : 2,
+      "min_retry_interval_millis": 60000,
+      "retry_on_timeout"   : false,
+      "depends_on"         : []
+    },
+    {
+      "task_key"        : "02_Silver_Transform",
+      "description"     : "Cleanses, validates, and conforms Bronze data into Silver Delta tables (SCD2 for customers).",
+      "job_cluster_key" : "medallion_cluster",
+      "notebook_task": {
+        "notebook_path"  : "/Repos/banking_project/databricks/notebooks/02_silver_transform",
+        "base_parameters": {
+          "bronze_path": "abfss://bronze@<ADLS>.dfs.core.windows.net/banking",
+          "silver_path": "abfss://silver@<ADLS>.dfs.core.windows.net/banking",
+          "run_date"   : "{{job.start_time.iso_date}}"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds"    : 5400,
+      "max_retries"        : 1,
+      "min_retry_interval_millis": 120000,
+      "depends_on"         : [{ "task_key": "01_Bronze_Ingest" }]
+    },
+    {
+      "task_key"        : "03_Data_Quality_Checks",
+      "description"     : "Runs 25+ DQ checks across Silver tables. Fails the job on any CRITICAL violation.",
+      "job_cluster_key" : "medallion_cluster",
+      "notebook_task": {
+        "notebook_path"  : "/Repos/banking_project/databricks/notebooks/04_data_quality_checks",
+        "base_parameters": {
+          "run_date": "{{job.start_time.iso_date}}"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 1800,
+      "max_retries"    : 0,
+      "depends_on"     : [{ "task_key": "02_Silver_Transform" }]
+    },
+    {
+      "task_key"        : "04_Gold_Aggregations",
+      "description"     : "Builds Gold fact/dimension/aggregation tables optimised for Power BI consumption.",
+      "job_cluster_key" : "medallion_cluster",
+      "notebook_task": {
+        "notebook_path"  : "/Repos/banking_project/databricks/notebooks/03_gold_aggregations",
+        "base_parameters": {
+          "silver_path": "abfss://silver@<ADLS>.dfs.core.windows.net/banking",
+          "gold_path"  : "abfss://gold@<ADLS>.dfs.core.windows.net/banking",
+          "run_date"   : "{{job.start_time.iso_date}}"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds"    : 7200,
+      "max_retries"        : 1,
+      "min_retry_interval_millis": 180000,
+      "depends_on"         : [{ "task_key": "03_Data_Quality_Checks" }]
+    },
+    {
+      "task_key"   : "05_Notify_Success",
+      "description": "Sends a success notification and logs the pipeline run metadata.",
+      "job_cluster_key": "medallion_cluster",
+      "python_wheel_task": {
+        "package_name": "banking_notifications",
+        "entry_point" : "notify_success",
+        "parameters"  : ["--run_date", "{{job.start_time.iso_date}}", "--job_id", "{{job.id}}"]
+      },
+      "depends_on": [{ "task_key": "04_Gold_Aggregations" }]
+    }
+  ],
+  "run_as": {
+    "service_principal_name": "databricks-sp-banking"
+  },
+  "access_control_list": [
+    { "user_name"  : "data-engineer@company.com",       "permission_level": "CAN_MANAGE" },
+    { "user_name"  : "data-analyst@company.com",        "permission_level": "CAN_VIEW" },
+    { "group_name" : "data-engineering-team",           "permission_level": "CAN_MANAGE_RUN" }
+  ]
+}

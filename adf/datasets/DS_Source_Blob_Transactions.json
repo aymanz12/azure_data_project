@@ -1,0 +1,40 @@
+{
+  "name": "DS_Source_Blob_Transactions",
+  "properties": {
+    "description": "Dataset pointing to transactions.csv in the source Blob Storage container (raw-data).",
+    "linkedServiceName": {
+      "referenceName": "AzureBlobStorage_Source",
+      "type": "LinkedServiceReference"
+    },
+    "type": "DelimitedText",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobStorageLocation",
+        "container": "raw-data",
+        "folderPath": "banking/transactions",
+        "fileName": "transactions.csv"
+      },
+      "columnDelimiter": ",",
+      "rowDelimiter": "\n",
+      "firstRowAsHeader": true,
+      "nullValue": "",
+      "compressionCodec": "none",
+      "encodingName": "UTF-8"
+    },
+    "schema": [
+      { "name": "transaction_id",    "type": "String" },
+      { "name": "account_id",        "type": "String" },
+      { "name": "transaction_date",  "type": "String" },
+      { "name": "transaction_type",  "type": "String" },
+      { "name": "amount",            "type": "Double" },
+      { "name": "currency",          "type": "String" },
+      { "name": "channel",           "type": "String" },
+      { "name": "status",            "type": "String" },
+      { "name": "merchant_category", "type": "String" },
+      { "name": "merchant_name",     "type": "String" },
+      { "name": "description",       "type": "String" },
+      { "name": "is_flagged",        "type": "Boolean" }
+    ],
+    "annotations": ["source", "raw", "transactions"]
+  }
+}

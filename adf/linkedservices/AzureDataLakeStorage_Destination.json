@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/Microsoft.DataFactory.json",
+  "name": "AzureDatalakeStorage_Destination",
+  "properties": {
+    "description": "Linked service for Azure Data Lake Storage Gen2 (ADLS) used as the Databricks external location (Bronze container).",
+    "type": "AzureBlobFS",
+    "typeProperties": {
+      "url": "https://<ADLS_ACCOUNT>.dfs.core.windows.net",
+      "accountKey": {
+        "type": "SecureString",
+        "value": "<ADLS_ACCOUNT_KEY>"
+      }
+    },
+    "annotations": ["destination", "adls", "bronze"],
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    }
+  }
+}

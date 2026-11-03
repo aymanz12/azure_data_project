@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/Microsoft.DataFactory.json",
+  "name": "AzureBlobStorage_Source",
+  "properties": {
+    "description": "Linked service for the SOURCE Azure Blob Storage account where raw banking CSVs land.",
+    "type": "AzureBlobStorage",
+    "typeProperties": {
+      "connectionString": {
+        "type": "SecureString",
+        "value": "DefaultEndpointsProtocol=https;AccountName=<SOURCE_STORAGE_ACCOUNT>;AccountKey=<SECRET_KEY>;EndpointSuffix=core.windows.net"
+      }
+    },
+    "annotations": ["source", "raw", "banking"],
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    }
+  }
+}

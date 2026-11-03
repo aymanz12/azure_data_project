@@ -1,0 +1,231 @@
+{
+  "name": "PL_Ingest_Banking_Raw_To_Bronze",
+  "properties": {
+    "description": "Master ingestion pipeline. Copies all raw banking CSV files from Azure Blob Storage (source) to ADLS Gen2 Bronze layer as Parquet. Then triggers Databricks notebooks for Medallion transformation.",
+    "activities": [
+
+      {
+        "name": "Check_Source_File_Exists",
+        "description": "Validate that all expected source files exist before ingestion starts.",
+        "type": "GetMetadata",
+        "dependsOn": [],
+        "policy": { "timeout": "00:05:00", "retry": 2, "retryIntervalInSeconds": 30 },
+        "typeProperties": {
+          "dataset": {
+            "referenceName": "DS_Source_Blob_Transactions",
+            "type": "DatasetReference"
+          },
+          "fieldList": ["exists", "size", "lastModified"],
+          "storeSettings": { "type": "AzureBlobStorageReadSettings" }
+        }
+      },
+
+      {
+        "name": "IF_File_Exists",
+        "description": "Only proceed if the source file exists.",
+        "type": "IfCondition",
+        "dependsOn": [
+          { "activity": "Check_Source_File_Exists", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "expression": {
+            "value": "@activity('Check_Source_File_Exists').output.exists",
+            "type": "Expression"
+          },
+          "ifTrueActivities": [
+
+            {
+              "name": "Copy_Transactions_Blob_To_Bronze",
+              "description": "Copies transactions.csv → ADLS Bronze Parquet (partitioned by date).",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": { "timeout": "01:00:00", "retry": 3, "retryIntervalInSeconds": 60 },
+              "typeProperties": {
+                "source": {
+                  "type": "DelimitedTextSource",
+                  "storeSettings": { "type": "AzureBlobStorageReadSettings", "recursive": false },
+                  "formatSettings": { "type": "DelimitedTextReadSettings" }
+                },
+                "sink": {
+                  "type": "ParquetSink",
+                  "storeSettings": { "type": "AzureBlobFSWriteSettings" },
+                  "formatSettings": { "type": "ParquetWriteSettings" }
+                },
+                "enableStaging": false,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": { "allowDataTruncation": true, "treatBooleanAsNumber": false }
+                }
+              },
+              "inputs":  [{ "referenceName": "DS_Source_Blob_Transactions",       "type": "DatasetReference" }],
+              "outputs": [{ "referenceName": "DS_Sink_ADLS_Bronze_Transactions", "type": "DatasetReference" }]
+            },
+
+            {
+              "name": "Copy_Customers_Blob_To_Bronze",
+              "description": "Copies customers.csv → ADLS Bronze Parquet.",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": { "timeout": "00:30:00", "retry": 3, "retryIntervalInSeconds": 60 },
+              "typeProperties": {
+                "source": {
+                  "type": "DelimitedTextSource",
+                  "storeSettings": { "type": "AzureBlobStorageReadSettings", "recursive": false }
+                },
+                "sink": {
+                  "type": "ParquetSink",
+                  "storeSettings": { "type": "AzureBlobFSWriteSettings" }
+                },
+                "enableStaging": false
+              },
+              "inputs":  [{ "referenceName": "DS_Source_Blob_Customers",   "type": "DatasetReference" }],
+              "outputs": [{ "referenceName": "DS_Sink_ADLS_Bronze_Customers","type": "DatasetReference" }]
+            },
+
+            {
+              "name": "Copy_Accounts_Blob_To_Bronze",
+              "description": "Copies accounts.csv → ADLS Bronze Parquet.",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": { "timeout": "00:30:00", "retry": 3, "retryIntervalInSeconds": 60 },
+              "typeProperties": {
+                "source": { "type": "DelimitedTextSource", "storeSettings": { "type": "AzureBlobStorageReadSettings" } },
+                "sink":   { "type": "ParquetSink",         "storeSettings": { "type": "AzureBlobFSWriteSettings" } }
+              },
+              "inputs":  [{ "referenceName": "DS_Source_Blob_Accounts",   "type": "DatasetReference" }],
+              "outputs": [{ "referenceName": "DS_Sink_ADLS_Bronze_Accounts","type": "DatasetReference" }]
+            },
+
+            {
+              "name": "Copy_FraudLabels_Blob_To_Bronze",
+              "description": "Copies fraud_labels.csv → ADLS Bronze Parquet.",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": { "timeout": "00:15:00", "retry": 3, "retryIntervalInSeconds": 60 },
+              "typeProperties": {
+                "source": { "type": "DelimitedTextSource", "storeSettings": { "type": "AzureBlobStorageReadSettings" } },
+                "sink":   { "type": "ParquetSink",         "storeSettings": { "type": "AzureBlobFSWriteSettings" } }
+              },
+              "inputs":  [{ "referenceName": "DS_Source_Blob_FraudLabels",   "type": "DatasetReference" }],
+              "outputs": [{ "referenceName": "DS_Sink_ADLS_Bronze_FraudLabels","type": "DatasetReference" }]
+            },
+
+            {
+              "name": "Wait_All_Copies_Done",
+              "description": "Synchronization barrier — wait for all parallel copies.",
+              "type": "Wait",
+              "dependsOn": [
+                { "activity": "Copy_Transactions_Blob_To_Bronze",  "dependencyConditions": ["Succeeded"] },
+                { "activity": "Copy_Customers_Blob_To_Bronze",     "dependencyConditions": ["Succeeded"] },
+                { "activity": "Copy_Accounts_Blob_To_Bronze",      "dependencyConditions": ["Succeeded"] },
+                { "activity": "Copy_FraudLabels_Blob_To_Bronze",   "dependencyConditions": ["Succeeded"] }
+              ],
+              "typeProperties": { "waitTimeInSeconds": 5 }
+            },
+
+            {
+              "name": "Trigger_Databricks_Bronze_To_Silver",
+              "description": "Runs the Bronze → Silver Databricks notebook via ADF Databricks Notebook activity.",
+              "type": "DatabricksNotebook",
+              "dependsOn": [
+                { "activity": "Wait_All_Copies_Done", "dependencyConditions": ["Succeeded"] }
+              ],
+              "policy": { "timeout": "02:00:00", "retry": 1, "retryIntervalInSeconds": 120 },
+              "linkedServiceName": {
+                "referenceName": "AzureDatabricks_LinkedService",
+                "type": "LinkedServiceReference"
+              },
+              "typeProperties": {
+                "notebookPath": "/Repos/banking_project/databricks/notebooks/02_silver_transform",
+                "baseParameters": {
+                  "bronze_path"  : "abfss://bronze@<ADLS>.dfs.core.windows.net/banking",
+                  "silver_path"  : "abfss://silver@<ADLS>.dfs.core.windows.net/banking",
+                  "run_date"     : { "value": "@formatDateTime(pipeline().TriggerTime,'yyyy-MM-dd')", "type": "Expression" }
+                }
+              }
+            },
+
+            {
+              "name": "Trigger_Databricks_Silver_To_Gold",
+              "description": "Runs the Silver → Gold Databricks notebook after Silver is ready.",
+              "type": "DatabricksNotebook",
+              "dependsOn": [
+                { "activity": "Trigger_Databricks_Bronze_To_Silver", "dependencyConditions": ["Succeeded"] }
+              ],
+              "policy": { "timeout": "02:00:00", "retry": 1, "retryIntervalInSeconds": 120 },
+              "linkedServiceName": {
+                "referenceName": "AzureDatabricks_LinkedService",
+                "type": "LinkedServiceReference"
+              },
+              "typeProperties": {
+                "notebookPath": "/Repos/banking_project/databricks/notebooks/03_gold_aggregations",
+                "baseParameters": {
+                  "silver_path" : "abfss://silver@<ADLS>.dfs.core.windows.net/banking",
+                  "gold_path"   : "abfss://gold@<ADLS>.dfs.core.windows.net/banking",
+                  "run_date"    : { "value": "@formatDateTime(pipeline().TriggerTime,'yyyy-MM-dd')", "type": "Expression" }
+                }
+              }
+            },
+
+            {
+              "name": "Log_Success",
+              "description": "Log successful pipeline run to an audit table via a stored procedure.",
+              "type": "AzureFunctionActivity",
+              "dependsOn": [
+                { "activity": "Trigger_Databricks_Silver_To_Gold", "dependencyConditions": ["Succeeded"] }
+              ],
+              "typeProperties": {
+                "functionName": "LogPipelineRun",
+                "method": "POST",
+                "body": {
+                  "value": "@concat('{\"pipeline\":\"PL_Ingest_Banking_Raw_To_Bronze\",\"status\":\"SUCCESS\",\"run_date\":\"',formatDateTime(pipeline().TriggerTime,'yyyy-MM-dd'),'\",\"run_id\":\"',pipeline().RunId,'\"}')",
+                  "type": "Expression"
+                }
+              }
+            }
+
+          ],
+          "ifFalseActivities": [
+            {
+              "name": "Fail_File_Not_Found",
+              "description": "Raise pipeline failure if source file is missing.",
+              "type": "Fail",
+              "typeProperties": {
+                "message": {
+                  "value": "@concat('Source file not found. Pipeline aborted at: ', utcnow())",
+                  "type": "Expression"
+                },
+                "errorCode": "SOURCE_FILE_MISSING"
+              }
+            }
+          ]
+        }
+      }
+
+    ],
+    "parameters": {
+      "run_date": { "type": "string", "defaultValue": "@formatDateTime(utcnow(),'yyyy-MM-dd')" }
+    },
+    "variables": {
+      "ingestion_status": { "type": "String", "defaultValue": "PENDING" }
+    },
+    "triggers": [
+      {
+        "name": "Daily_Trigger_6AM_UTC",
+        "properties": {
+          "type": "ScheduleTrigger",
+          "typeProperties": {
+            "recurrence": {
+              "frequency": "Day",
+              "interval": 1,
+              "startTime": "2024-01-01T06:00:00Z",
+              "timeZone": "UTC"
+            }
+          }
+        }
+      }
+    ],
+    "annotations": ["banking", "ingestion", "medallion", "daily"]
+  }
+}

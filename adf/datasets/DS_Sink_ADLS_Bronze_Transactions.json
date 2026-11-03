@@ -1,0 +1,23 @@
+{
+  "name": "DS_Sink_ADLS_Bronze_Transactions",
+  "properties": {
+    "description": "Sink dataset — writes Parquet files into the ADLS Bronze container under /bronze/transactions/.",
+    "linkedServiceName": {
+      "referenceName": "AzureDataLakeStorage_Destination",
+      "type": "LinkedServiceReference"
+    },
+    "type": "Parquet",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileSystem": "bronze",
+        "folderPath": {
+          "value": "banking/transactions/@{formatDateTime(pipeline().TriggerTime, 'yyyy/MM/dd')}",
+          "type": "Expression"
+        }
+      },
+      "compressionCodec": "snappy"
+    },
+    "annotations": ["sink", "bronze", "parquet", "transactions"]
+  }
+}

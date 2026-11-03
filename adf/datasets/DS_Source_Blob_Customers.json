@@ -1,0 +1,37 @@
+{
+  "name": "DS_Source_Blob_Customers",
+  "properties": {
+    "description": "Dataset pointing to customers.csv in the source Blob Storage container.",
+    "linkedServiceName": {
+      "referenceName": "AzureBlobStorage_Source",
+      "type": "LinkedServiceReference"
+    },
+    "type": "DelimitedText",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobStorageLocation",
+        "container": "raw-data",
+        "folderPath": "banking/customers",
+        "fileName": "customers.csv"
+      },
+      "columnDelimiter": ",",
+      "rowDelimiter": "\n",
+      "firstRowAsHeader": true,
+      "nullValue": "",
+      "encodingName": "UTF-8"
+    },
+    "schema": [
+      { "name": "customer_id",  "type": "String" },
+      { "name": "first_name",   "type": "String" },
+      { "name": "last_name",    "type": "String" },
+      { "name": "email",        "type": "String" },
+      { "name": "phone",        "type": "String" },
+      { "name": "country",      "type": "String" },
+      { "name": "segment",      "type": "String" },
+      { "name": "date_joined",  "type": "String" },
+      { "name": "credit_score", "type": "Integer" },
+      { "name": "is_active",    "type": "Boolean" }
+    ],
+    "annotations": ["source", "raw", "customers"]
+  }
+}

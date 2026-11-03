@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/Microsoft.DataFactory.json",
+  "name": "AzureDatabricks_LinkedService",
+  "properties": {
+    "description": "Linked service to Azure Databricks cluster for ADF to trigger Databricks notebooks.",
+    "type": "AzureDatabricks",
+    "typeProperties": {
+      "domain": "https://adb-<workspace-id>.<random>.azuredatabricks.net",
+      "accessToken": {
+        "type": "SecureString",
+        "value": "<DATABRICKS_PAT_TOKEN>"
+      },
+      "existingClusterId": "<EXISTING_CLUSTER_ID>",
+      "newClusterNodeType": "Standard_DS3_v2",
+      "newClusterNumOfWorker": "2:8",
+      "newClusterVersion": "13.3.x-scala2.12",
+      "newClusterInitScripts": [],
+      "clusterOption": "Fixed"
+    },
+    "annotations": ["databricks", "transform", "orchestration"],
+    "connectVia": {
+      "referenceName": "AutoResolveIntegrationRuntime",
+      "type": "IntegrationRuntimeReference"
+    }
+  }
+}
