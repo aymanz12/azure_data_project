@@ -1,4 +1,4 @@
-# 🏦 Azure Banking Analytics Platform
+﻿# 🏦 Azure Banking Analytics Platform
 
 <div align="center">
 
@@ -70,7 +70,8 @@ The analytical layer is powered by **Metabase**, delivering self-service BI and 
 > Comprehensive operational surveillance tracking transaction volumes, revenue channels, ticket sizes, and merchant breakdowns.
 
 ![Executive KPIs](assets/kpis_transactions.png)
-![Dashboard 1: Transactions & Channels](assets/metabase_transactions_dashboard.png)
+![Dashboard 1: Transactions & Channels � Top](assets/metabase_transactions_dashboard_top.png)
+![Dashboard 1: Transactions & Channels � Bottom](assets/metabase_transactions_dashboard_bottom.png)
 
 - **Executive KPIs**: Total Transactions (49,650), Total Volume ($12.45M), Average Ticket Size ($250), and Active Global Markets (10).
 - **Daily Volume Trend**: Smooth time-series line chart of daily spend across the full year.
@@ -85,7 +86,8 @@ The analytical layer is powered by **Metabase**, delivering self-service BI and 
 > Advanced risk intelligence tracking fraud velocity, geographic loss exposure, and customer portfolio risk.
 
 ![Fraud KPIs](assets/kpis_fraud.png)
-![Dashboard 2: Fraud & Customer Intelligence](assets/metabase_fraud_dashboard.png)
+![Dashboard 2: Fraud & Customer Intelligence � Top](assets/metabase_fraud_dashboard_top.png)
+![Dashboard 2: Fraud & Customer Intelligence � Bottom](assets/metabase_fraud_dashboard_bottom.png)
 
 - **Risk & Loss KPIs**: Overall Fraud Rate (2.33%), Total Fraud Losses ($289K), Total Incidents (1,160), and Affected Customers.
 - **Attack Vector Profiling**: Losses segmented by country (FR leads at 2.71%) and vulnerable banking channels.
@@ -98,8 +100,9 @@ The analytical layer is powered by **Metabase**, delivering self-service BI and 
 
 > World-map heatmaps, monthly trend analysis, channel diagnostics, and merchant revenue vs fraud decomposition.
 
-![Dashboard 3: Advanced Analytics — Top](assets/metabase_advanced_dashboard_top.png)
-![Dashboard 3: Advanced Analytics — Bottom](assets/metabase_advanced_dashboard_bottom.png)
+![Dashboard 3: Advanced Analytics - Part 1](assets/metabase_advanced_dashboard_part1.png)
+![Dashboard 3: Advanced Analytics - Part 2](assets/metabase_advanced_dashboard_part2.png)
+![Dashboard 3: Advanced Analytics - Part 3](assets/metabase_advanced_dashboard_part3.png)
 
 - **World Maps**: Transaction volume heatmap (blue gradient) and Fraud loss heatmap (amber to red) across all 10 countries.
 - **Monthly Fraud Trend**: Dual-metric line chart tracking Fraud Loss (USD) vs Fraud Case count over time.
@@ -178,9 +181,13 @@ azure_data_project/
 │
 ├── assets/                            # Architecture diagrams & dashboard screenshots
 │   ├── diagram.png
-│   ├── metabase_transactions_dashboard.png
-│   ├── metabase_fraud_dashboard.png
-│   ├── metabase_advanced_dashboard.png
+│   ├── metabase_transactions_dashboard_top.png
+│   ├── metabase_transactions_dashboard_bottom.png
+│   ├── metabase_fraud_dashboard_top.png
+│   ├── metabase_fraud_dashboard_bottom.png
+│   ├── metabase_advanced_dashboard_part1.png
+│   ├── metabase_advanced_dashboard_part2.png
+│   └── metabase_advanced_dashboard_part3.png
 │   ├── kpis_transactions.png
 │   └── kpis_fraud.png
 │
