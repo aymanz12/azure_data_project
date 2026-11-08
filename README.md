@@ -6,7 +6,7 @@
 ![Databricks](https://img.shields.io/badge/Azure_Databricks-FF3621?style=for-the-badge&logo=databricks&logoColor=white)
 ![Delta Lake](https://img.shields.io/badge/Delta_Lake-00ADD8?style=for-the-badge&logo=delta&logoColor=white)
 ![Apache Spark](https://img.shields.io/badge/Apache_Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![Metabase](https://img.shields.io/badge/Metabase-509EE3?style=for-the-badge&logo=metabase&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
@@ -20,7 +20,7 @@
 
 The **Azure Banking Analytics Platform** is an enterprise data engineering solution built to process, transform, and analyze high-volume banking transactions, customer profiles, and risk vectors. 
 
-Operating on a **Medallion Lakehouse Architecture (Bronze ➔ Silver ➔ Gold)** powered by **Azure Data Factory**, **Azure Data Lake Storage Gen2**, **Azure Databricks (PySpark & Delta Lake)**, and **Databricks SQL**, the platform delivers curated analytical marts directly to **Grafana** for executive monitoring and fraud detection.
+Operating on a **Medallion Lakehouse Architecture (Bronze ➔ Silver ➔ Gold)** powered by **Azure Data Factory**, **Azure Data Lake Storage Gen2**, **Azure Databricks (PySpark & Delta Lake)**, and **Databricks SQL**, the platform delivers curated analytical marts directly to **Metabase** for executive monitoring and fraud detection.
 
 ---
 
@@ -53,7 +53,7 @@ Operating on a **Medallion Lakehouse Architecture (Bronze ➔ Silver ➔ Gold)**
                                  │
                                  ▼
                      ┌───────────────────────┐
-                     │   Grafana Dashboards  │  Real-Time Executive & Risk Surveillance
+                     │  Metabase Dashboards  │  Self-Service BI & Executive Intelligence
                      │  (Dockerized Service) │  • 🏦 Transactions & Channels
                      │                       │  • 🛡️ Fraud & Customer 360
                      └───────────────────────┘
@@ -61,37 +61,50 @@ Operating on a **Medallion Lakehouse Architecture (Bronze ➔ Silver ➔ Gold)**
 
 ---
 
-## 📊 Real-Time Grafana Dashboards
+## 📊 Real-Time Metabase Dashboards
 
-The analytical layer is powered by **Grafana**, delivering live, high-performance executive dashboards connected to curated Gold Delta marts.
+The analytical layer is powered by **Metabase**, delivering self-service BI and executive dashboards connected to curated Gold Delta marts.
 
 ### 1. 🏦 Transaction & Channel Overview
 
 > Comprehensive operational surveillance tracking transaction volumes, revenue channels, ticket sizes, and merchant breakdowns.
 
 ![Executive KPIs](assets/kpis_transactions.png)
-![Dashboard 1: Transactions & Channels](assets/grafana_transactions_dashboard.png)
+![Dashboard 1: Transactions & Channels](assets/metabase_transactions_dashboard.png)
 
-- **Executive KPIs**: Total Transactions ($49.7\text{K}$), Total Volume ($\$12.5\text{M}$), Average Ticket Size ($\$251$), and Active Global Markets ($10$).
-- **Volume Trend Analysis**: Daily volume trajectory with 365-day moving averages and peak spend detection.
-- **Omnichannel Performance**: Comparative volume and revenue split across **POS, Mobile, Web, Branch, and ATM** with operational success rates.
-- **Merchant Distribution**: Donut chart breakdown across 10 distinct merchant categories (Grocery, Electronics, Travel, etc.).
+- **Executive KPIs**: Total Transactions (49,650), Total Volume ($12.45M), Average Ticket Size ($250), and Active Global Markets (10).
+- **Daily Volume Trend**: Smooth time-series line chart of daily spend across the full year.
+- **Omnichannel Performance**: Revenue and transaction count split across **POS, MOBILE, WEB, BRANCH, and ATM** with channel success rate table.
+- **Merchant Distribution**: Donut chart breakdown across 10 merchant categories (Grocery, Electronics, Travel, etc.).
+- **Geographic Analysis**: Top 10 markets by total spend ranked horizontally.
 
 ---
 
 ### 2. 🛡️ Fraud & Customer 360 Intelligence
 
-> Advanced risk intelligence tracking real-time fraud velocity, geographic loss exposure, and customer portfolio risk.
+> Advanced risk intelligence tracking fraud velocity, geographic loss exposure, and customer portfolio risk.
 
 ![Fraud KPIs](assets/kpis_fraud.png)
-![Dashboard 2: Fraud & Customer Intelligence](assets/grafana_fraud_dashboard.png)
+![Dashboard 2: Fraud & Customer Intelligence](assets/metabase_fraud_dashboard.png)
 
-- **Risk & Loss KPIs**: Real-time Fraud Rate ($2.34\%$) with multi-level threshold alerts, Total Fraud Losses ($\$289\text{K}$), Incident Count ($1.16\text{K}$), and Impacted Customers.
-- **Attack Vector Profiling**: Losses segmented by country (US, UK, FR, DE, CA, etc.) and vulnerable banking channels.
-- **Customer 360 Portfolio**: Customer distribution across segments (**Retail 52%**, **Premium 26%**, **Corporate 13%**, **SME**) and value tiers (**Bronze**, **Silver**, **Gold**, **Platinum**).
-- **Forensic Investigation Table**: Incident-level log detailing merchant exposure, status confirmation, and average loss per incident for rapid triage.
+- **Risk & Loss KPIs**: Overall Fraud Rate (2.33%), Total Fraud Losses ($289K), Total Incidents (1,160), and Affected Customers.
+- **Attack Vector Profiling**: Losses segmented by country (FR leads at 2.71%) and vulnerable banking channels.
+- **Customer 360 Portfolio**: Segment distribution (Corporate, Retail, SME, Premium) and value tiers (Bronze to Platinum).
+- **Forensic Investigation Table**: Top 20 attack vectors with merchant, channel, country and average loss per incident.
 
 ---
+
+### 3. 🌍 Advanced Analytics & Geographic Intelligence
+
+> World-map heatmaps, monthly trend analysis, channel diagnostics, and merchant revenue vs fraud decomposition.
+
+![Dashboard 3: Advanced Analytics](assets/metabase_advanced_dashboard.png)
+
+- **World Maps**: Transaction volume heatmap (blue gradient) and Fraud loss heatmap (amber to red) across all 10 countries.
+- **Monthly Fraud Trend**: Dual-metric line chart tracking Fraud Loss (USD) vs Fraud Case count over time.
+- **Channel Diagnostics**: Stacked success/failure rate bar + fraud rate by channel comparison.
+- **Merchant Revenue vs Fraud**: Grouped bar comparing total revenue against fraud exposure per merchant category.
+- **Customer Tier Analysis**: Avg spend and fraud rate across Bronze/Silver/Gold/Platinum tiers.
 
 ## 🛠️ Technology Stack
 
@@ -106,7 +119,7 @@ The analytical layer is powered by **Grafana**, delivering live, high-performanc
 | **Query Engine** | **Databricks SQL Warehouse** | Serverless SQL execution engine powering BI query workloads. |
 | **Data Governance** | **Custom Data Quality Framework**| 25+ automated validation rules (null checks, referential integrity, range thresholds). |
 | **Dimensional Modeling**| **Star Schema & SCD Type 2** | Slowly Changing Dimensions (Type 2) tracking historical customer profile changes. |
-| **Visualization & BI** | **Grafana (v10.4)** | Real-time interactive dashboards with alerting, time series, and custom visual panels. |
+| **Visualization & BI** | **Metabase (v0.52)** | Self-service BI with SQL editor, interactive dashboards, and automated question builder. |
 | **Containerization** | **Docker & Docker Compose** | Portable, reproducible deployment for the visualization tier. |
 
 ---
@@ -157,18 +170,16 @@ azure_data_project/
 │   └── jobs/
 │       └── banking_medallion_job.json # Production workflow DAG configuration
 │
-├── grafana/                           # Production Grafana Visualization Tier
-│   ├── dashboards/                    # Provisioned dashboard definitions
-│   │   ├── dashboard1_transactions.json
-│   │   └── dashboard2_fraud.json
-│   ├── provisioning/                  # Automated datasources & dashboard providers
-│   ├── docker-compose.yml             # Containerized deployment manifest
-│   └── README.md                      # Grafana & Databricks SQL setup guide
+├── metabase/                          # Production Metabase BI Tier
+│   ├── docker-compose.yml             # Containerized Metabase service
+│   ├── setup_metabase.py              # Automated API setup (DB + questions + dashboards)
+│   └── README.md                      # Metabase & Databricks SQL setup guide
 │
 ├── assets/                            # Architecture diagrams & dashboard screenshots
 │   ├── diagram.png
-│   ├── grafana_transactions_dashboard.png
-│   ├── grafana_fraud_dashboard.png
+│   ├── metabase_transactions_dashboard.png
+│   ├── metabase_fraud_dashboard.png
+│   ├── metabase_advanced_dashboard.png
 │   ├── kpis_transactions.png
 │   └── kpis_fraud.png
 │
@@ -187,17 +198,17 @@ Deploy ADF pipelines and import Databricks notebooks into your Azure workspace:
 # 01_bronze_ingest -> 02_silver_transform -> 03_gold_aggregations -> 04_data_quality_checks
 ```
 
-### 2. Launching Grafana Dashboards
-The Grafana visualization service runs as an isolated container:
+### 2. Launching Metabase Dashboards
+The Metabase BI service runs as an isolated container:
 ```bash
-cd grafana
+cd metabase
 docker compose up -d
+# Then run the automated setup (once):
+python metabase/setup_metabase.py
 ```
 Access the dashboards at `http://localhost:3000`:
-- **Default Login**: `admin` / `admin123` *(Anonymous Admin access enabled)*
-- **Direct Links**:
-  - [🏦 Transaction & Channel Overview](http://localhost:3000/d/banking_txn_channel_overview)
-  - [🛡️ Fraud & Customer Intelligence](http://localhost:3000/d/banking_fraud_customer_intel)
+- **Login**: `admin@banking.local` / `Admin123!`
+- Dashboards are created automatically by the setup script
 
 ---
 
