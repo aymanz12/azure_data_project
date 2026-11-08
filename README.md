@@ -98,7 +98,8 @@ The analytical layer is powered by **Metabase**, delivering self-service BI and 
 
 > World-map heatmaps, monthly trend analysis, channel diagnostics, and merchant revenue vs fraud decomposition.
 
-![Dashboard 3: Advanced Analytics](assets/metabase_advanced_dashboard.png)
+![Dashboard 3: Advanced Analytics — Top](assets/metabase_advanced_dashboard_top.png)
+![Dashboard 3: Advanced Analytics — Bottom](assets/metabase_advanced_dashboard_bottom.png)
 
 - **World Maps**: Transaction volume heatmap (blue gradient) and Fraud loss heatmap (amber to red) across all 10 countries.
 - **Monthly Fraud Trend**: Dual-metric line chart tracking Fraud Loss (USD) vs Fraud Case count over time.
